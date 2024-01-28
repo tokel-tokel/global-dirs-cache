@@ -23,25 +23,42 @@ GDC_WORK_DIR=${~GDC_WORK_DIR}
 }
 
 function check_dir() {
-  dirlist=($(cat ${GDC_WORK_DIR}/dir_list 2> /dev/null))
+  touch ${GDC_WORK_DIR}/dir_list
+  dirlist=("${(@f)$(cat ${GDC_WORK_DIR}/dir_list)}")
   typeset -i len=${#dirlist[@]}
+  typeset -i newlen=$len
   typeset -i i=1
   while [[ $i -le $len ]]
   do
-    if [[ ${dirlist[$i]} == $PWD ]]
+    if [[ "${dirlist[$i]}" == "$PWD" ]] || [[ -z "${dirlist[$i]}" ]] 
     then
       unset "dirlist[$i]"
+      let newlen--
     fi
     let i++
   done
-  dirlist+=( $PWD )
-  len=${#dirlist[@]}
-  if [[ $len -gt $GDC_MAX_DIRS ]]
-  then
-    dirlist=(${dirlist[@]:$(( GDC_MAX_DIRS - len ))})
-  fi
-  touch ${GDC_WORK_DIR}/dir_list
-  echo ${dirlist[@]} > ${GDC_WORK_DIR}/dir_list
+  dirlist+=( "$PWD" )
+  let len++
+  let newlen++
+  i=1
+  while [[ $newlen -gt $GDC_MAX_DIRS ]] && [[ $i -le $len ]]
+  do
+    if [[ -n "${dirlist[$i]}" ]]
+    then
+      unset "dirlist[$i]"
+      let newlen--
+    fi  
+    let i++
+  done
+  echo -n > ${GDC_WORK_DIR}/dir_list
+  while [[ $i -le $len ]]
+  do
+    if [[ -n "${dirlist[$i]}" ]]
+    then
+      echo "${dirlist[$i]}" >> ${GDC_WORK_DIR}/dir_list
+    fi
+    let i++
+  done
 }
 
-add-zsh-hook precmd check_dir
+add-zsh-hook preexec check_dir
