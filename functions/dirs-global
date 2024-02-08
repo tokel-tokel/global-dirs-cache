@@ -6,22 +6,13 @@ typeset -i cparam=1
 typeset -i nparam=1
 typeset -i aparam=1
 
-function print-all-dirs() {
-  for i in {1..$len}
-  do
-    if [[ -n "${dirlist[i]}" ]]
-    then
-      printf "%-7d %s\n" $(( $len - $i )) ${dirlist[i]}
-    fi
-  done
-}
 
-function print-short-dirs() {
+function print-dirs() {
   i=$len
   en=1
-  if [[ $len -gt $GDC_SHORT_DIRS ]]
+  if [[ $len -gt $1 ]]
   then
-    en=$(( $len - $GDC_SHORT_DIRS + 1 ))
+    en=$(( $len - $1 + 1 ))
   fi
 
   while [[ $i -ge $en ]]
@@ -66,7 +57,7 @@ if [[ $cparam == 0 ]]; then
 elif [[ $nparam == 0 ]]; then
   echo ${dirlist[$realn]}
 elif [[ $aparam == 0 ]]; then
-  print-all-dirs | less
+  print-dirs $GDC_MAX_DIRS | less
 else
-  print-short-dirs
+  print-dirs $GDC_SHORT_DIRS
 fi
