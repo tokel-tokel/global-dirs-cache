@@ -22,6 +22,10 @@ GDC_WORK_DIR=${~GDC_WORK_DIR}
   return 1
 }
 
+export GDC_MAX_DIRS
+export GDC_SHORT_DIRS
+export GDC_WORK_DIR
+
 function check_dir() {
   touch ${GDC_WORK_DIR}/dir_list
   dirlist=("${(@f)$(cat ${GDC_WORK_DIR}/dir_list)}")
@@ -60,5 +64,7 @@ function check_dir() {
     let i++
   done
 }
+
+autoload -U dirs-global
 
 add-zsh-hook preexec check_dir
